@@ -16,6 +16,20 @@ security:
             security: false
         main:
             anonymous: lazy
+            guard:
+                authenticators:
+                    - App\Security\LoginFormAuthenticator
+            logout:
+                path: app_logout
+                # where to redirect after logout
+                # target: app_any_route
+            login:
+                pattern: ^/api/login
+                stateless: true
+                anonymous: true
+                json_login:
+                    check_path: /login/api_check
+                    success_hendler:
 
             # activate different ways to authenticate
             # https://symfony.com/doc/current/security.html#firewalls-authentication
