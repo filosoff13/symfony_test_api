@@ -38,7 +38,7 @@ class SecurityController extends AbstractController
     }
 
     /**
-     * @Route("/signup", name="signup", methods={"POST"})
+     * @Route("/signup", name="signup", methods={"POST", "GET"})
      * @param Request $request
      * @return string
      */
@@ -49,11 +49,11 @@ class SecurityController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $entityManager = $this->getDoctrine()->getManager();
-            $entityManager->persist($user);
-            $entityManager->flush();
+            $entityUser = $this->getDoctrine()->getManager();
+            $entityUser->persist($user);
+            $entityUser->flush();
 
-            return "Create new user";
+            return $this->json([], 201);
         }
 
         //реализовать: при не прохождении валидации вывести json file
