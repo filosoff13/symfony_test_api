@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Entity\User;
 use Cassandra\Type\UserType;
+use HttpHeaderException;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
@@ -41,22 +42,39 @@ class SecurityController extends AbstractController
      * @Route("/signup", name="signup", methods={"POST", "GET"})
      * @param Request $request
      * @return string
+     * @throws HttpHeaderException
      */
     public function signup(Request $request): string
     {
-        $user = new User();
-        $form = $this->createForm(UserType::class, $user);
-        $form->handleRequest($request);
+        $request->request->get('username');
+        $user = $this->getDoctrine()
+            ->getRepository(\Symfony\Component\Security\Core\User\User::class)
+            ->findOneBy(['username' => $request]);
 
-        if ($form->isSubmitted() && $form->isValid()) {
-            $entityUser = $this->getDoctrine()->getManager();
-            $entityUser->persist($user);
-            $entityUser->flush();
 
-            return $this->json([], 201);
+        if (!$user){
+            $userNew = new User($request->getUser(), $request->getPassword());
+
+            //add to DB
+            $this->getDoctrine()->getManager()->flush();
+            return new Response(null,201);
         }
+        throw new HttpHeaderException("user not created");
 
-        //реализовать: при не прохождении валидации вывести json file
-        return "Test";
+//        $user = new User();
+//        $form = $this->createForm(UserType::class, $user);
+//        $form->handleRequest($request);
+//
+//        if ($form->isSubmitted() && $form->isValid()) {
+//            $entityUser = $this->getDoctrine()->getManager();
+//            $entityUser->persist($user);
+//            $entityUser->flush();
+//
+//            return "ff";
+////            return $this->json([], 201);
+//        }
+//
+//        //реализовать: при не прохождении валидации вывести json file
+//        return "Test";
     }
 }
